@@ -3,7 +3,7 @@ import java.util.*;
 public class Solution {
 
 	/*
-		KOSARAJU'S Algo
+		KOSARAJU'S Algo for finding Strictly Connected Component
 		1. Stroe Topological sort into stack
 		2. Transpose the matrix
 		3. Do DFS according to stack nodes on the transpose graph.
