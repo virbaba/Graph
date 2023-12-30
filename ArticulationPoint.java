@@ -21,15 +21,14 @@ public class ArticulationPoints {
         boolean[] visited = new boolean[v];
         int[] disc = new int[v]; // discovery time of vertices
         int[] low = new int[v]; // earliest visited vertex reachable from subtree rooted with i
-        int[] parent = new int[v]; // parent in DFS tree
         boolean[] isArticulation = new boolean[v]; // to mark articulation points
         int currentTime = 0;
         
         Arrays.fill(parent, -1); // initialize parent array
         
-        for (int i = 0; i < v; i++) {
+        for (int vertex = 0; vertex < v; vertex++) {
             if (!visited[i]) {
-                findArticulationPointsUtil(i, visited, disc, low, adjList, parent, isArticulation, currentTime);
+                findArticulationPointsUtil(vertex, -1, visited, disc, low, adjList, isArticulation, currentTime);
             }
         }
         
@@ -42,28 +41,27 @@ public class ArticulationPoints {
         return result;
     }
     
-    private void findArticulationPointsUtil(int u, boolean[] visited, int[] disc, int[] low, 
-                                           List<Integer>[] adjList, int[] parent, boolean[] isArticulation, int currentTime) {
+    private void findArticulationPointsUtil(int vertex, int parent, boolean[] visited, int[] disc, int[] low, 
+                                           List<Integer>[] adjList, boolean[] isArticulation, int currentTime) {
         int children = 0; // count of child nodes in DFS tree
-        visited[u] = true;
-        disc[u] = low[u] = currentTime++;
+        visited[vertex] = true;
+        disc[vertex] = low[vertex] = currentTime++;
         
-        for (int v : adjList[u]) {
-            if (!visited[v]) {
+        for (int neighbour : adjList[vertex]) {
+            if (!visited[neighbour]) {
                 children++;
-                parent[v] = u;
-                findArticulationPointsUtil(v, visited, disc, low, adjList, parent, isArticulation, currentTime);
-                low[u] = Math.min(low[u], low[v]);
+                findArticulationPointsUtil(neighbour, vertex, visited, disc, low, adjList, isArticulation, currentTime);
+                low[vertex] = Math.min(low[vertex], low[neighbour]);
                 
                 // Check for articulation points using low values
-                if (parent[u] == -1 && children > 1) {
+                if (parent == -1 && children > 1) {
+                    isArticulation[vertex] = true;
+                }
+                if (parent != -1 && low[neighbour] >= disc[vertex]) {
                     isArticulation[u] = true;
                 }
-                if (parent[u] != -1 && low[v] >= disc[u]) {
-                    isArticulation[u] = true;
-                }
-            } else if (v != parent[u]) {
-                low[u] = Math.min(low[u], disc[v]);
+            } else if (parent != neighbour) {
+                low[vertex] = Math.min(low[vertex], disc[neighbour]);
             }
         }
     }
