@@ -49,7 +49,7 @@ public class Solution {
             int par2 = findPar(parent, node2);
             
             // if parent of both vertex is not equall then connect both 
-            // and store their weight if equall do nothing
+            // and store their weight and if equall do nothing
             if (par1 != par2) {
                 totalWeights += weight;
                 unionByRank(parent, rank, node1, node2);
