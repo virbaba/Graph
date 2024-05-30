@@ -1,72 +1,75 @@
-/*
-  Time Complexity: O(m) + O(n) + O(n . (n+2m))
-*/
 import java.util.*;
 import java.io.*;
-import java.util.ArrayList;
 
-public class Solution {
+class Node implements Comparable<Node> {
+    int node;
+    int distance;
 
-    public static int getMin(int[] distance, boolean[] visited) {
-        int minDistance = Integer.MAX_VALUE;
-        int minIndex = -1;
-        for (int i = 1; i < distance.length; i++) {
-            if (!visited[i] && distance[i] < minDistance) {
-                minDistance = distance[i];
-                minIndex = i;
-            }
-        }
-        return minIndex;
+    public Node(int node, int distance) {
+        this.node = node;
+        this.distance = distance;
     }
 
+    @Override
+    public int compareTo(Node n) {
+        return Integer.compare(this.distance, n.distance);
+    }
+}
 
+public class Solution {
     public static ArrayList<ArrayList<Integer>> calculatePrimsMST(int n, int m, ArrayList<ArrayList<Integer>> edges) {
-        // Write your code here.
+        // Create adjacency list
         HashMap<Integer, List<int[]>> adjList = new HashMap<>();
-        ArrayList<ArrayList<Integer>> ans = new ArrayList<>();
-        
         for (ArrayList<Integer> edge : edges) {
             int from = edge.get(0);
             int to = edge.get(1);
-            int distance = edge.get(2);
+            int dis = edge.get(2);
 
-            adjList.computeIfAbsent(from, k -> new ArrayList<>()).add(new int[] { to, distance });
-            adjList.computeIfAbsent(to, k -> new ArrayList<>()).add(new int[] { from, distance });
+            adjList.computeIfAbsent(from, k -> new ArrayList<>()).add(new int[] { to, dis });
+            adjList.computeIfAbsent(to, k -> new ArrayList<>()).add(new int[] { from, dis });
         }
 
-        int[] parent = new int[n + 1];
-        Arrays.fill(parent, -1);
-
         int[] distance = new int[n + 1];
-        Arrays.fill(distance, Integer.MAX_VALUE);
-        distance[1] = 0;
-
+        int[] parent = new int[n + 1];
         boolean[] visited = new boolean[n + 1];
 
-        while (true) {
-            int minIndex = getMin(distance, visited);
-            if (minIndex == -1) {
-                break; // All vertices have been visited
-            }
+        // Initialize distances
+        Arrays.fill(distance, Integer.MAX_VALUE);
+        distance[1] = 0;
+        
+        PriorityQueue<Node> q = new PriorityQueue<>();
+        q.offer(new Node(1, 0));
 
-            visited[minIndex] = true;
-            List<int[]> neighbours = adjList.getOrDefault(minIndex, new ArrayList<>());
+        while (!q.isEmpty()) {
+            Node currNode = q.poll();
+            int pNode = currNode.node;
+
+            if (visited[pNode]) continue;
+            visited[pNode] = true;
+
+            List<int[]> neighbours = adjList.getOrDefault(pNode, new ArrayList<>());
+
             for (int[] neighbour : neighbours) {
-                int child = neighbour[0];
-                int childDis = neighbour[1];
-                if (!visited[child] && childDis < distance[child]) {
-                    parent[child] = minIndex;
-                    distance[child] = childDis;
+                int cNode = neighbour[0];
+                int cNodeDis = neighbour[1];
+
+                if (!visited[cNode] && cNodeDis < distance[cNode]) {
+                    parent[cNode] = pNode;
+                    distance[cNode] = cNodeDis;
+                    q.offer(new Node(cNode, cNodeDis));
                 }
             }
         }
 
+        ArrayList<ArrayList<Integer>> ans = new ArrayList<>();
         for (int i = 2; i <= n; i++) {
-            ArrayList<Integer> edge = new ArrayList<>();
-            edge.add(parent[i]);
-            edge.add(i);
-            edge.add(distance[i]);
-            ans.add(edge);
+            if (parent[i] != 0) {
+                ArrayList<Integer> list = new ArrayList<>();
+                list.add(parent[i]);
+                list.add(i);
+                list.add(distance[i]);
+                ans.add(list);
+            }
         }
 
         return ans;
